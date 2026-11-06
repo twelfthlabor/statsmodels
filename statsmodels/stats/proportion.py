@@ -1567,7 +1567,7 @@ def proportions_chisquare_allpairs(count, nobs, multitest_method="hs"):
     ----------
     count : {int, array_like}
         the number of successes in nobs trials.
-    nobs : int
+    nobs : int or array_like
         the number of trials or observations.
     multitest_method : str, optional
         This chooses the method for the multiple testing p-value correction,
@@ -1586,6 +1586,7 @@ def proportions_chisquare_allpairs(count, nobs, multitest_method="hs"):
     -----
     Yates continuity correction is not available.
     """
+    count, nobs = np.broadcast_arrays(count, nobs)
     # all_pairs = lmap(list, lzip(*np.triu_indices(4, 1)))
     all_pairs = lzip(*np.triu_indices(len(count), 1))
     pvals = [
@@ -1610,7 +1611,7 @@ def proportions_chisquare_pairscontrol(
     ----------
     count : {int, array_like}
         the number of successes in nobs trials.
-    nobs : int
+    nobs : int or array_like
         the number of trials or observations.
     value : None or float, optional
         Value of the proportion under the null hypothesis. Not yet
@@ -1647,6 +1648,7 @@ def proportions_chisquare_pairscontrol(
     )
     if value is not None:
         raise NotImplementedError
+    count, nobs = np.broadcast_arrays(count, nobs)
     # all_pairs = lmap(list, lzip(*np.triu_indices(4, 1)))
     all_pairs = [(0, k) for k in range(1, len(count))]
     pvals = [

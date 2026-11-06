@@ -1962,6 +1962,34 @@ def test_proportions_chisquare_allpairs_invalid_inputs_raises():
         )
 
 
+@pytest.mark.parametrize(
+    "count, nobs",
+    [
+        ([10, 20, 30], [50, 60, 70]),
+        ([10, 20, 30], 70),
+        (pd.Series([10, 20, 30], index=[3, 4, 5]), [50, 60, 70]),
+        ([10, 20, 30], pd.Series([50, 60, 70], index=[3, 4, 5])),
+    ],
+)
+def test_proportions_chisquare_pairs_array_like(count, nobs):
+    # lists, a scalar nobs and labeled Series previously raised when indexing
+    counts, sizes = np.asarray(count), np.broadcast_to(nobs, 3)
+    expected = [
+        stats.chi2_contingency(
+            [
+                [counts[i], sizes[i] - counts[i]],
+                [counts[j], sizes[j] - counts[j]],
+            ],
+            correction=False,
+        ).pvalue
+        for i, j in [(0, 1), (0, 2), (1, 2)]
+    ]
+    res = smprop.proportions_chisquare_allpairs(count, nobs)
+    assert_allclose(res.pvals_raw, expected)
+    res = smprop.proportions_chisquare_pairscontrol(count, nobs)
+    assert_allclose(res.pvals_raw, expected[:2])
+
+
 def test_proportion_effectsize_invalid_inputs_raises():
     # out-of-range proportions previously returned nan without any error
     with pytest.raises(ValueError, match="prop1 must be in the range"):
